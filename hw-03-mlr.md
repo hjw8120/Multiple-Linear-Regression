@@ -1,7 +1,7 @@
 HW 03: Multiple Linear Regression
 ================
-INSERT NAME
-INSERT DATE
+Hannah Wang
+2019 October 2
 
 ``` r
 library(tidyverse)
@@ -16,15 +16,42 @@ houses <- read_csv("data/KingCountyHouses.csv")
 
 ### Question 1
 
+speed-hat = 52.387 + 0.020 \* year - 0.0032 \* starters - 1.070 \* good
+-2.1834 \* slow + 0.012 \* (year x good) + 0.012 \* (year x slow)
+
 ### Question 2
+
+For slow track conditions:
+
+speed-hat = 52.387 + 0.020 \* year - 0.0032 \* starters - 1.070 \* 0 -
+2.1834 \* 1 + 0.012 \* (year x 0) + 0.012 \* (year x 1)
+
+\= 50.2036 + 0.032 \* year - 0.0032 \* starters
 
 ### Question 3
 
+The intercept (52.387 feet per second) describes the average speed for a
+winner in the year 1896, with a fast track condition, and racing with 0
+horses. The intercept is not meaningful because it does not make sense
+for the winner to race against 0 horses.
+
 ### Question 4
+
+The p-value is 0.013. We use the p-value in the conditiongood variable
+row because that is the p-value we get from comparing good track
+conditions to the baseline condition of fast track. Since year = 0, we
+don’t have to worry about the interaction variables.
 
 ### Question 5
 
+All other variables held constant, the winner’s speed is predicted, on
+average, to be 2.183 feet per second lower on a slow track than on a
+fast track.
+
 ### Question 6
+
+The p-value is 0.113. We use the p-value in the year:conditiongood
+interaction variable row.
 
 ### Question 7
 
