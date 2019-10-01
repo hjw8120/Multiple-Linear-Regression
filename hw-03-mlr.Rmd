@@ -52,8 +52,24 @@ The p-value is 0.113. We use the p-value in the year:conditiongood interaction v
 
 ### Question 7 
 
+```{r crit-value}
+qt(0.975, 115)
+```
+
+CI = slope of year for slow track ± t* SE(slope of year for slow track)
+
+CI = 0.012 ± 0.004 t*
+
+```{r conf-int}
+0.012 + 0.004 * 1.980808
+0.012 - 0.004 * 1.980808
+```
+
+We are 95% confident that the true difference between the slope of year for slow track conditions and the slope of year for fast track conditions lies between 0.00407 and 0.1992. In other words, we are 95% confident that for a one year increase, the winner's speed on a slow track is expected to increase, on average, by 0.004 to 0.020 feet per second more than the winner's speed on a fast track.
 
 ### Question 8
+
+#### Introduction
 
 ```{r new-variables}
 houses <- houses %>%
@@ -65,8 +81,45 @@ houses <- houses %>%
          logprice = log(price))
 ```
 
+Fit a regression model between logprice and predictor variables:
 
+```{r model}
+logprice_model <- lm(logprice ~ floorsCat + sqftCent + bedroomsCent + bathroomsCent + waterfront, data = houses)
+kable(tidy(logprice_model, conf.int = TRUE, level = 0.95),digits=3)
+```
 
+logprice-hat = 13.015 + 0.184 * floorsCat1.5 - 0.002 * floorsCat2 + 0.206 * floorsCat2.5 + 0.214 * floorsCat3 + 0.273 * floorsCat3.5 + 0.000 * sqftCent - 0.062 * bedroomsCent + 0.061 * bathroomsCent + 0.567 * waterfront
+
+```{r price-dist}
+ggplot(data = houses, mapping = aes(x = price)) + geom_histogram() + labs(title = "Distribution of Price for Houses Sold in King County, Washington")
+```
+
+The distribution of house prices is unimodal and strongly right skewed due to high outliers of houses that are extremely expensive. Thus, we visualize the distribution of the log transformed house prices.
+
+```{r logprice-dist}
+ggplot(data = houses, mapping = aes(x = logprice)) + geom_histogram() + labs(title = "Distribution of Logprice for Houses Sold in King County, Washington")
+```
+
+The distribution of logprice is unimodal and relatively normal. We use the log-transformed version of price because it gives us a more normal distribution that is more spread out and easier to analyze, as opposed to the clustered and extremely right skewed distribution of price, due to the high outliers.
+
+Created a scatterplot to visualize the relationship between logprice and square footage:
+
+```{r price-sqft}
+ggplot(data = houses, mapping = aes(x = sqftCent, y = logprice)) + geom_point() + labs(title = "Relationship between Logprice and Square Footage")
+```
+
+There is a strong positive correlation between a house's logprice and square footage.
+
+#### MAYBE USE
+
+```{r resid}
+houses <- houses %>%
+  mutate(resid = residuals(logprice_model))
+```
+
+```{r resid-plot}
+ggplot(data = houses, mapping = aes(x = sqftCent, y = resid)) + geom_point()
+```
 
 ### Overall (do not delete!)
 
