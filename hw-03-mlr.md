@@ -16,18 +16,20 @@ houses <- read_csv("data/KingCountyHouses.csv")
 
 ### Question 1
 
-For fast track conditions:
+Equation of model to estimate speed for fast track conditions:
 
 speed-hat = 52.387 + 0.020 \* year - 0.003 \* starters
 
 ### Question 2
 
-For slow track conditions:
+Equation of model to estimate speed for slow track conditions:
 
 speed-hat = 52.387 + 0.020 \* year - 0.003 \* starters - 1.070 \* 0 -
-2.1834 \* 1 + 0.012 \* (year x 0) + 0.012 \* (year x 1)
+2.183 \* conditionslow + 0.012 \* (year \* 0) + 0.012 \* (year \*
+conditionslow)
 
-\= 50.2036 + 0.032 \* year - 0.003 \* starters
+\= 52.387 + 0.020 \* year - 0.003 \* starters - 2.183 \* conditionslow +
+0.012 \* (year \* conditionslow)
 
 ### Question 3
 
@@ -38,21 +40,24 @@ for the winner to race against 0 horses.
 
 ### Question 4
 
-The p-value is 0.013. We use the p-value in the conditiongood variable
-row because that is the p-value we get from comparing good track
-conditions to the baseline condition of fast track. Since year = 0, we
-don’t have to worry about the interaction variables.
+The p-value testing differences in mean winning speed between fast and
+good track conditions in year 0 (with starters held constant) is 0.013.
+Since p\<0.05, there is a significant difference between mean winning
+speed on fast and good track conditions.
 
 ### Question 5
 
-All other variables held constant, the winner’s speed is predicted, on
+The coeffecient for conditionsslow (assuming year = 0) shows that for
+all other variables held constant, the winner’s speed is predicted, on
 average, to be 2.183 feet per second lower on a slow track than on a
 fast track.
 
 ### Question 6
 
-The p-value is 0.113. We use the p-value in the year:conditiongood
-interaction variable row.
+The p-value testing if slope of year is the same for fast and good track
+conditions (with starters and year held constant) is 0.113. Since
+p\>0.05, there is no significant difference between slope of year for
+fast and good track conditions.
 
 ### Question 7
 
@@ -137,8 +142,11 @@ ggplot(data = houses, mapping = aes(x = price)) + geom_histogram() + labs(title 
 ![](hw-03-mlr_files/figure-gfm/price-dist-1.png)<!-- -->
 
 The distribution of house prices is unimodal and strongly right skewed
-due to high outliers of houses that are extremely expensive. Thus, we
-visualize the distribution using the log transformed house
+due to high outliers of houses that are extremely expensive (up to
+around $6,0000,000). It is difficult to determine center and spread
+since the distribution is so strongly skewed and the wide range covers
+over 6,0000,0000. Thus, we visualize the distribution using the log
+transformed house
 prices.
 
 ``` r
@@ -147,11 +155,14 @@ ggplot(data = houses, mapping = aes(x = logprice)) + geom_histogram() + labs(tit
 
 ![](hw-03-mlr_files/figure-gfm/logprice-dist-1.png)<!-- -->
 
-The distribution of logprice is unimodal and relatively normal. We use
-the log-transformed version of price because it gives us a more normal
-distribution that is more spread out and easier to analyze, as opposed
-to the clustered and extremely right skewed distribution of price, due
-to the high outliers from very expensive houses.
+The distribution of logprice is unimodal and relatively normal and
+symmetric, centered around 13 with a range of about 3. We use the
+log-transformed version of price because it gives us a more normal
+distribution that is easier to analyze, as opposed to the extremely
+right skewed distribution of price, due to the high outliers from very
+expensive houses. The distribution of logprice better represents the
+data in terms of center, shape, and spread, thus making it more
+appropriate to use for our model.
 
 Created scatterplots to visualize the relationship between logprice and
 predictor
@@ -163,42 +174,9 @@ pairs(logprice ~ floorsCat + sqftCent + bedroomsCent + bathroomsCent + waterfron
 
 ![](hw-03-mlr_files/figure-gfm/pairs-logprice-1.png)<!-- -->
 
-#### Discussion
-
-Relationship between House Price and Square Footage:
-
-For every 1 square foot increase in a house’s interior square footage,
-we expect the median price to be multiplied by a factor of $1.0004. We
-are 95% confident that for a 1 square foot increase in a house’s
-interior square footage, we can expect the median price to be multiplied
-by a factor of 1.00039 to 1.00041.
-
-Relationship between House Price and Number of Floors:
-
-A house with 1.5 floors is expected to have a median price 1.202 times
-the price of a 1-floor house. A house with 2 floors is expected to have
-a median price 0.998 times the price of a 1-floor house. A house with
-2.5 floors is expected to have a median price 1.229 times the price of a
-1-floor house. A house with 3 floors is expected to have a median price
-1.238 times the price of a 1-floor house. A house with 3.5 floors is
-expected to have a median price 1.314 times the price of a 1-floor
-house.
-
-The null hypothesis states that there is no statistically significant
-difference in house price between houses with 1 floor and 1.5, 2, 2.5,
-3, and 3.5 floors. The alternative hypothesis states that there is a
-statistically significant difference in house prices between houses with
-different number of floors.
-
-The differences in house price are statistically significant for all
-floors except between houses with 1 floor and 2 floors. This is because
-the p-value for 2 floor houses is 0.765, which is greater than the alpha
-level of 0.05, thus we fail to reject the null hypothesis, showing there
-is no statisically significant difference in house price betwen houses
-with 1 and 2
-floors.
-
 #### Assumptions
+
+##### Linearity
 
 ``` r
 ggplot(data = houses, mapping = aes(x = floorsCat, y = logprice)) + geom_point() + labs(title = "Relationship between Logprice and Number of Floors")
@@ -230,6 +208,14 @@ ggplot(data = houses, mapping = aes(x = waterfront, y = logprice)) + geom_point(
 
 ![](hw-03-mlr_files/figure-gfm/linearity-plots-5.png)<!-- -->
 
+Linearity is satisfied for all predictor variables except number of
+floors because the scatterplots for the other variables show relatively
+positive correlations with logprice that follow a linear relationship,
+but the scatterplot between logprice and floorsCat does not follow a
+linear relationship.
+
+##### Normality
+
 ``` r
 houses <- houses %>%
   mutate(predicted = predict.lm(logprice_model), resid = residuals(logprice_model))
@@ -240,6 +226,22 @@ ggplot(data = houses, mapping = aes(x = resid)) + geom_histogram() + labs(title 
 ```
 
 ![](hw-03-mlr_files/figure-gfm/resid-hist-1.png)<!-- -->
+
+``` r
+ggplot(data = houses, mapping = aes(sample = resid)) + 
+  stat_qq() + 
+  stat_qq_line() +
+  labs(title = "Normal QQ Plot of Residuals")
+```
+
+![](hw-03-mlr_files/figure-gfm/qqplot-1.png)<!-- -->
+
+Normality is satisfied because the distribution of residuals for the
+logprice model is normal and the normal qq plot of residuals follows the
+line of best
+fit.
+
+##### Constant Variance
 
 ``` r
 ggplot(data = houses, mapping = aes(x = predicted, y = resid)) + geom_point() + geom_hline(yintercept = 0, color ="red") + labs(title = "Residual Plot of Logprice Residuals vs. Predicted Logprice")
@@ -272,42 +274,76 @@ ggplot(data = houses, mapping = aes(x = bathroomsCent, y = resid)) + geom_point(
 ![](hw-03-mlr_files/figure-gfm/resid-plot-5.png)<!-- -->
 
 ``` r
-ggplot(data = houses, mapping = aes(x = waterfront, y = resid)) + geom_point() + geom_hline(yintercept = 0, color ="red") + labs(title = "Residual Plot of Logprice Residuals vs. Waterfront")
+ggplot(data = houses, mapping = aes(x = as.factor(waterfront), y = resid)) + geom_boxplot() + geom_hline(yintercept = 0, color ="red") + labs(title = "Residual Plot of Logprice Residuals vs. Waterfront")
 ```
 
 ![](hw-03-mlr_files/figure-gfm/resid-plot-6.png)<!-- -->
-
-``` r
-ggplot(data = houses, mapping = aes(sample = resid)) + 
-  stat_qq() + 
-  stat_qq_line() +
-  labs(title = "Normal QQ Plot of Residuals")
-```
-
-![](hw-03-mlr_files/figure-gfm/qqplot-1.png)<!-- -->
-
-Linearity is satisfied for all predictor variables except number of
-floors because the scatterplots for the other variables show relatively
-positive correlations with logprice that follow a linear relationship,
-but the scatterplot between logprice and number of floors does not show
-a linear relationship.
-
-Normality is satisfied because the distribution of residuals for the
-logprice model is normal and the normal qq plot of residuals follows the
-line of best fit.
 
 Constant Variance is not satsified for any of the predictor variables
 because the the variation in residuals are not constant across any of
 the predictor variables.
 
+##### Independence
+
 Independence is not satisfied because a house’s price is not completely
 indpendent of other houses’ prices. For example, if the economy is not
 doing well, house prices might decrease in general, or houses might be
-priced lower to compete in the market. Also, houses in the same
-neighborhood might all be priced
-similarly.
+priced lower relative to other houses to compete in the market. Also,
+houses in the same neighborhood might all be priced similarly because
+they are built the same way and attract the same demographics.
+
+#### Inference and Prediction
+
+##### Relationship between House Price and Square Footage:
+
+For every 1 square foot increase in a house’s interior square footage,
+we expect the median price to be multiplied by a factor of $1.0004. We
+are 95% confident that for a 1 square foot increase in a house’s
+interior square footage, we can expect the median price to be multiplied
+by a factor of 1.00039 to 1.00041.
+
+##### Relationship between House Price and Number of Floors:
+
+A house with 1.5 floors is expected to have a median price 1.202 times
+the price of a 1-floor house. A house with 2 floors is expected to have
+a median price 0.998 times the price of a 1-floor house. A house with
+2.5 floors is expected to have a median price 1.229 times the price of a
+1-floor house. A house with 3 floors is expected to have a median price
+1.238 times the price of a 1-floor house. A house with 3.5 floors is
+expected to have a median price 1.314 times the price of a 1-floor
+house.
+
+The null hypothesis states that there is no statistically significant
+difference in house price between houses with 1 floor and 1.5, 2, 2.5,
+3, and 3.5 floors. The alternative hypothesis states that there is a
+statistically significant difference in house prices between houses with
+different number of floors.
+
+H0: μ1=μ1.5=μ2=μ2.5=μ3=μ3.5
+
+Ha: At least one μ is not equal to the others
+
+The differences in house price are statistically significant for all
+floors except between houses with 1 floor and 2 floors. This is because
+the p-value for 2 floor houses is 0.765, which is greater than the alpha
+level of 0.05, thus we fail to reject the null hypothesis, showing there
+is no statisically significant difference in house price betwen houses
+with 1 and 2
+floors.
 
 #### Interaction
+
+``` r
+ggplot(data = houses, mapping = aes(x = bedroomsCent, y = logprice, color = waterfront)) + geom_point()
+```
+
+![](hw-03-mlr_files/figure-gfm/plot-interaction-1.png)<!-- -->
+
+According to the scatterplot, for a given number of bedrooms, it seems
+that houses with a waterfront tend to have higher prices than houses
+without a waterfront. However, we need to see if this interaction
+difference is actually
+significant.
 
 ``` r
 logprice_model <- lm(logprice ~ floorsCat + sqftCent + bedroomsCent + bathroomsCent + waterfront + waterfront * bedroomsCent, data = houses)
@@ -328,8 +364,9 @@ kable(tidy(logprice_model, conf.int = TRUE, level = 0.95),digits=5)
 | waterfront              |   0.56878 |   0.02948 |   19.29264 | 0.00000 |   0.51099 |   0.62656 |
 | bedroomsCent:waterfront |   0.02033 |   0.02918 |    0.69677 | 0.48595 | \-0.03686 |   0.07752 |
 
-The interaction between `waterfront` and `bedroomsCent` is not
-significant because the p-value is 0.486, which is higher than the alpha
-level of 0.05.
+The model with the bedroomsCent:waterfront interaction variable included
+gives a p-value of 0.486 for the bedroomsCent:waterfont variable.
+Because the p-value is greater than the alpha level of 0.05, the
+interaction between `waterfront` and `bedroomsCent` is not significant.
 
 ### Overall (do not delete\!)
