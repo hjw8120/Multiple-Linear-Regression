@@ -67,16 +67,16 @@ CI = slope of year for slow track ± t\* SE(slope of year for slow track)
 CI = 0.012 ± 0.004 t\*
 
 ``` r
-0.012 + 0.004 * 1.980808
-```
-
-    ## [1] 0.01992323
-
-``` r
 0.012 - 0.004 * 1.980808
 ```
 
     ## [1] 0.004076768
+
+``` r
+0.012 + 0.004 * 1.980808
+```
+
+    ## [1] 0.01992323
 
 We are 95% confident that the true difference between the slope of year
 for slow track conditions and the slope of year for fast track
@@ -153,6 +153,16 @@ distribution that is more spread out and easier to analyze, as opposed
 to the clustered and extremely right skewed distribution of price, due
 to the high outliers from very expensive houses.
 
+Created scatterplots to visualize the relationship between logprice and
+predictor
+variables:
+
+``` r
+pairs(logprice ~ floorsCat + sqftCent + bedroomsCent + bathroomsCent + waterfront, data = houses, lower.panel = NULL)
+```
+
+![](hw-03-mlr_files/figure-gfm/pairs-logprice-1.png)<!-- -->
+
 #### Discussion
 
 Relationship between House Price and Square Footage:
@@ -185,9 +195,40 @@ floors except between houses with 1 floor and 2 floors. This is because
 the p-value for 2 floor houses is 0.765, which is greater than the alpha
 level of 0.05, thus we fail to reject the null hypothesis, showing there
 is no statisically significant difference in house price betwen houses
-with 1 and 2 floors.
+with 1 and 2
+floors.
 
 #### Assumptions
+
+``` r
+ggplot(data = houses, mapping = aes(x = floorsCat, y = logprice)) + geom_point() + labs(title = "Relationship between Logprice and Number of Floors")
+```
+
+![](hw-03-mlr_files/figure-gfm/linearity-plots-1.png)<!-- -->
+
+``` r
+ggplot(data = houses, mapping = aes(x = sqftCent, y = logprice)) + geom_point() + labs(title = "Relationship between Logprice and Square Footage")
+```
+
+![](hw-03-mlr_files/figure-gfm/linearity-plots-2.png)<!-- -->
+
+``` r
+ggplot(data = houses, mapping = aes(x = bedroomsCent, y = logprice)) + geom_point() + labs(title = "Relationship between Logprice and Number of Bedrooms")
+```
+
+![](hw-03-mlr_files/figure-gfm/linearity-plots-3.png)<!-- -->
+
+``` r
+ggplot(data = houses, mapping = aes(x = bathroomsCent, y = logprice)) + geom_point() + labs(title = "Relationship between Logprice and Number of Bathrooms")
+```
+
+![](hw-03-mlr_files/figure-gfm/linearity-plots-4.png)<!-- -->
+
+``` r
+ggplot(data = houses, mapping = aes(x = waterfront, y = logprice)) + geom_point() + labs(title = "Relationship between Logprice and Waterfont")
+```
+
+![](hw-03-mlr_files/figure-gfm/linearity-plots-5.png)<!-- -->
 
 ``` r
 houses <- houses %>%
@@ -245,19 +286,26 @@ ggplot(data = houses, mapping = aes(sample = resid)) +
 
 ![](hw-03-mlr_files/figure-gfm/qqplot-1.png)<!-- -->
 
-Linearity
+Linearity is satisfied for all predictor variables except number of
+floors because the scatterplots for the other variables show relatively
+positive correlations with logprice that follow a linear relationship,
+but the scatterplot between logprice and number of floors does not show
+a linear relationship.
 
 Normality is satisfied because the distribution of residuals for the
 logprice model is normal and the normal qq plot of residuals follows the
 line of best fit.
 
-Constant Variance is not satsified
+Constant Variance is not satsified for any of the predictor variables
+because the the variation in residuals are not constant across any of
+the predictor variables.
 
 Independence is not satisfied because a house’s price is not completely
 indpendent of other houses’ prices. For example, if the economy is not
 doing well, house prices might decrease in general, or houses might be
-priced lower to compete in the
-market.
+priced lower to compete in the market. Also, houses in the same
+neighborhood might all be priced
+similarly.
 
 #### Interaction
 
@@ -279,5 +327,9 @@ kable(tidy(logprice_model, conf.int = TRUE, level = 0.95),digits=5)
 | bathroomsCent           |   0.06066 |   0.00565 |   10.74138 | 0.00000 |   0.04959 |   0.07173 |
 | waterfront              |   0.56878 |   0.02948 |   19.29264 | 0.00000 |   0.51099 |   0.62656 |
 | bedroomsCent:waterfront |   0.02033 |   0.02918 |    0.69677 | 0.48595 | \-0.03686 |   0.07752 |
+
+The interaction between `waterfront` and `bedroomsCent` is not
+significant because the p-value is 0.486, which is higher than the alpha
+level of 0.05.
 
 ### Overall (do not delete\!)
